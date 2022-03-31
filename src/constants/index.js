@@ -1,2 +1,2 @@
 export const LOGIN_MODAL_OPEN = 'LOGIN_MODAL_OPEN';
-export const SOMETHING = 'SOMETHING';
+export const GET_CURRENCIES = 'GET_CURRENCIES';
