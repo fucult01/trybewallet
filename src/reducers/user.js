@@ -5,6 +5,16 @@ const user = {
   email: '',
 };
 
+// const initialState = {
+//   user: {
+//     email: '',
+//   },
+//   wallet: {
+//     currencies: [],
+//     expenses: [],
+//   },
+// };
+
 export default function loginReducer(state = user, action) {
   switch (action.type) {
   case LOGIN_MODAL_OPEN:
