@@ -1,7 +1,7 @@
 // Coloque aqui suas actions
 import { LOGIN_MODAL_OPEN, GET_CURRENCIES } from '../constants';
 
-export default function login(payload) {
+export function userLogin(payload) {
   return {
     type: LOGIN_MODAL_OPEN,
     payload,

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Login from '../pages/Login';
-import actionLogin from '../actions/index';
+import { userLogin } from '../actions';
 
 class LoginContainer extends Component {
   constructor(props) {
@@ -34,8 +34,8 @@ class LoginContainer extends Component {
 
   onBtnClick() {
     const { email } = this.state;
-    const { history, userLogin } = this.props;
-    userLogin(email);
+    const { history, saveUserEmailToStore } = this.props;
+    saveUserEmailToStore(email);
     history.push('/carteira');
   }
 
@@ -67,7 +67,7 @@ class LoginContainer extends Component {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-  userLogin: (payload) => dispatch(actionLogin(payload)),
+  saveUserEmailToStore: (payload) => dispatch(userLogin(payload)),
 });
 
 export default connect(null, mapDispatchToProps)(LoginContainer);
@@ -76,5 +76,5 @@ LoginContainer.propTypes = {
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
   }).isRequired,
-  userLogin: PropTypes.func.isRequired,
+  saveUserEmailToStore: PropTypes.func.isRequired,
 };
