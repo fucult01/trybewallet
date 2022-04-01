@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import getCurrencies from '../services/api';
 import { saveCurrenciesToStore, saveExpensesToStore } from '../actions';
 import Form from './Form';
+import Table from './Table';
 
 let totalExpenses = 0;
 
@@ -109,6 +110,7 @@ class Wallet extends Component {
         >
           Adicionar despesa
         </button>
+        <Table />
       </div>
     );
   }
