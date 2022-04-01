@@ -86,7 +86,7 @@ class Wallet extends Component {
   }
 
   render() {
-    const { email } = this.props;
+    const { email, userExpenses } = this.props;
     const { currencies, expenses, description,
       currency, paymentMethod, expenseType, sum } = this.state;
     return (
@@ -110,7 +110,7 @@ class Wallet extends Component {
         >
           Adicionar despesa
         </button>
-        <Table />
+        <Table expenses={ userExpenses } />
       </div>
     );
   }
@@ -118,6 +118,7 @@ class Wallet extends Component {
 
 const mapStateToProps = (state) => ({
   email: state.user.email,
+  userExpenses: state.wallet.expenses,
 });
 
 const mapDispatchToProps = (dispatch) => ({
@@ -131,4 +132,5 @@ Wallet.propTypes = {
   email: PropTypes.string.isRequired,
   sendCurrenciesToStore: PropTypes.func.isRequired,
   sendExpensesToStore: PropTypes.func.isRequired,
+  userExpenses: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
