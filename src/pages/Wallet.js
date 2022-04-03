@@ -2,11 +2,9 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import getCurrencies from '../services/api';
-import { saveCurrenciesToStore, saveExpensesToStore } from '../actions';
+import { deleteExpense, saveCurrenciesToStore, saveExpensesToStore } from '../actions';
 import Form from './Form';
 import Table from './Table';
-
-let totalExpenses = 0;
 
 class Wallet extends Component {
   constructor() {
@@ -20,11 +18,12 @@ class Wallet extends Component {
       currency: 'USD',
       paymentMethod: 'Dinheiro',
       expenseType: 'Alimentação',
-      sum: 0,
+      totalExpenses: 0,
     };
 
     this.onChange = this.onChange.bind(this);
     this.onBtnClick = this.onBtnClick.bind(this);
+    this.deleteExpenseBtn = this.deleteExpenseBtn.bind(this);
   }
 
   componentDidMount() {
@@ -35,6 +34,7 @@ class Wallet extends Component {
       sendCurrenciesToStore(Object.keys(resp));
       this.setState({ currencies: Object.keys(resp) });
     });
+    this.renderAllExpenses();
   }
 
   onChange({ target }) {
@@ -65,35 +65,67 @@ class Wallet extends Component {
         tag: expenseType,
         exchangeRates: resp,
       });
-      const keyAndValueCurrencies = Object.entries(resp);
-
-      const expectedCurrency = keyAndValueCurrencies
-        .filter((element) => element.includes(currency))
-        .map((element2) => element2[1]);
-
-      const stringToNumberExchangeCurrency = Number(expectedCurrency[0].ask);
-
-      totalExpenses = expenses * stringToNumberExchangeCurrency;
-      this.setState((prevState) => ({
-        sum: prevState.sum + totalExpenses,
-      }));
+      this.renderAllExpenses();
     });
-
     this.setState((prevState) => ({
       expenses: '',
       id: prevState.id + 1,
     }));
   }
 
+  deleteExpenseBtn(id) {
+    const { userExpenses, saveNewExpensesToStore } = this.props;
+    const { totalExpenses } = this.state;
+
+    const expenseToBeDeleted = userExpenses.filter((element) => element.id === id);
+    const expenseValue = Number(expenseToBeDeleted.map(({ value }) => value));
+
+    const exchangeRateCurrency = Number(expenseToBeDeleted.map(
+      ({ exchangeRates, currency }) => exchangeRates[currency],
+    )[0].ask);
+    const expenseToBeDeletedValue = exchangeRateCurrency * expenseValue;
+    const valueAfterExpenseDeleted = totalExpenses - expenseToBeDeletedValue;
+
+    this.setState({ totalExpenses: valueAfterExpenseDeleted });
+    saveNewExpensesToStore(id);
+  }
+
+  renderAllExpenses() {
+    const { userExpenses } = this.props;
+    let totalUserExpenses = 0;
+    userExpenses.forEach(({ currency, value }) => {
+      let eachExpense = 0;
+      let totalExpensesArray = [];
+
+      const exchangeRatesArray = userExpenses.map((element) => element.exchangeRates);
+      const exchangeRatesArrayToObject = Object.assign({}, ...exchangeRatesArray);
+      const keyAndValueCurrencies = Object.entries(exchangeRatesArrayToObject);
+
+      const expectedCurrency = keyAndValueCurrencies
+        .filter((element) => element.includes(currency))
+        .map((element2) => element2[1]);
+
+      const stringToNumberExchangeCurrency = Number(expectedCurrency[0].ask);
+      eachExpense = value * stringToNumberExchangeCurrency;
+      totalExpensesArray = [...totalExpensesArray, eachExpense];
+
+      totalExpensesArray.forEach((element) => {
+        totalUserExpenses += element;
+      });
+    });
+    this.setState({ totalExpenses: totalUserExpenses });
+  }
+
   render() {
     const { email, userExpenses } = this.props;
     const { currencies, expenses, description,
-      currency, paymentMethod, expenseType, sum } = this.state;
+      currency, paymentMethod, expenseType, totalExpenses } = this.state;
+
     return (
       <div>
         <h1>TrybeWallet</h1>
         <span data-testid="email-field">{email}</span>
-        <span data-testid="total-field">{sum.toFixed(2)}</span>
+        <span data-testid="total-field">{totalExpenses.toFixed(2)}</span>
         <span data-testid="header-currency-field">BRL</span>
         <Form
           currencies={ currencies }
@@ -110,7 +142,10 @@ class Wallet extends Component {
         >
           Adicionar despesa
         </button>
-        <Table expenses={ userExpenses } />
+        <Table
+          expenses={ userExpenses }
+          deleteExpenseBtn={ this.deleteExpenseBtn }
+        />
       </div>
     );
   }
@@ -119,11 +154,13 @@ class Wallet extends Component {
 const mapStateToProps = (state) => ({
   email: state.user.email,
   userExpenses: state.wallet.expenses,
+  allExpanses: state.wallet.total,
 });
 
 const mapDispatchToProps = (dispatch) => ({
   sendCurrenciesToStore: (payload) => dispatch(saveCurrenciesToStore(payload)),
   sendExpensesToStore: (payload) => dispatch(saveExpensesToStore(payload)),
+  saveNewExpensesToStore: (payload) => dispatch(deleteExpense(payload)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Wallet);
@@ -133,4 +170,5 @@ Wallet.propTypes = {
   sendCurrenciesToStore: PropTypes.func.isRequired,
   sendExpensesToStore: PropTypes.func.isRequired,
   userExpenses: PropTypes.arrayOf(PropTypes.object).isRequired,
+  saveNewExpensesToStore: PropTypes.func.isRequired,
 };

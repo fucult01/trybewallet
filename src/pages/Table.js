@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { headerCell } from '../constants';
 
-export default function Table({ expenses }) {
+export default function Table({ expenses, deleteExpenseBtn }) {
   return (
     <header>
       <table>
@@ -25,6 +25,15 @@ export default function Table({ expenses }) {
                 <td>{Number((exchangeRates)[currency].ask).toFixed(2)}</td>
                 <td>{(((exchangeRates)[currency].ask) * value).toFixed(2)}</td>
                 <td>Real</td>
+                <td>
+                  <button
+                    type="button"
+                    data-testid="delete-btn"
+                    onClick={ () => deleteExpenseBtn(id) }
+                  >
+                    Excluir
+                  </button>
+                </td>
               </tr>
             ))}
         </tbody>
@@ -35,4 +44,5 @@ export default function Table({ expenses }) {
 
 Table.propTypes = {
   expenses: PropTypes.arrayOf(PropTypes.object).isRequired,
+  deleteExpenseBtn: PropTypes.func.isRequired,
 };
