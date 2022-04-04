@@ -43,6 +43,8 @@ class Wallet extends Component {
     this.renderAllExpenses();
   }
 
+  // Utilização do renderAllExpenses dentro do componentDidUpdate foi feita com a ajuda do Eduardo Santos na mentoria
+
   componentDidUpdate(prevProps) {
     const { userExpenses } = this.props;
     if (prevProps.userExpenses !== userExpenses) {
@@ -78,7 +80,6 @@ class Wallet extends Component {
         tag: expenseType,
         exchangeRates: resp,
       });
-      // this.renderAllExpenses();
     });
     this.setState((prevState) => ({
       expenses: '',
@@ -128,13 +129,11 @@ class Wallet extends Component {
       exchangeRates: exchangeRatesObject,
     });
     this.setState({ isEditClicked: false });
-    // this.renderAllExpenses();
   }
 
   renderAllExpenses() {
     const { userExpenses } = this.props;
     let totalUserExpenses = 0;
-    console.log(userExpenses);
     userExpenses.forEach(({ currency, value }) => {
       let eachExpense = 0;
       let totalExpensesArray = [];
@@ -149,9 +148,7 @@ class Wallet extends Component {
 
       const stringToNumberExchangeCurrency = Number(expectedCurrency[0].ask);
       eachExpense = value * stringToNumberExchangeCurrency;
-      console.log(eachExpense);
       totalExpensesArray = [...totalExpensesArray, eachExpense];
-      console.log(totalExpensesArray);
 
       totalExpensesArray.forEach((element) => {
         totalUserExpenses += element;
