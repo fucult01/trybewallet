@@ -28,15 +28,15 @@ export default function walletReducer(state = wallet, action) {
     };
   }
   case EDIT_EXPENSE: {
-    const nextTasks = state.expenses.map((task) => {
-      if (task.id === action.payload.expenseIdToBeEdited) {
+    const nextExpenses = state.expenses.map((expense) => {
+      if (expense.id === action.payload.id) {
         return action.payload;
       }
-      return task;
+      return expense;
     });
     return {
       ...state,
-      expenses: nextTasks,
+      expenses: nextExpenses,
     };
   }
   default: return state;

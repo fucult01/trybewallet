@@ -24,6 +24,8 @@ export default function Table({ expenses, deleteExpenseBtn, editExpenseBtn }) {
                 <td>{(exchangeRates[currency].name).split('/')[0]}</td>
                 <td>{Number((exchangeRates)[currency].ask).toFixed(2)}</td>
                 <td>{(((exchangeRates)[currency].ask) * value).toFixed(2)}</td>
+                {/* <td>4.20</td>
+                <td>420.41</td> */}
                 <td>Real</td>
                 <td>
                   <button

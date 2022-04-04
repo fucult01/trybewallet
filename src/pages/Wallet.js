@@ -6,6 +6,7 @@ import { deleteExpense, saveCurrenciesToStore,
   saveExpensesToStore, editExpensesToStore } from '../actions';
 import Form from './Form';
 import Table from './Table';
+import Header from './FormHeader';
 
 class Wallet extends Component {
   constructor() {
@@ -13,7 +14,6 @@ class Wallet extends Component {
 
     this.state = {
       id: 0,
-      expenseIdToBeEdited: 0,
       currencies: [],
       expenses: '',
       description: '',
@@ -29,6 +29,7 @@ class Wallet extends Component {
     this.deleteExpenseBtn = this.deleteExpenseBtn.bind(this);
     this.editExpenseBtn = this.editExpenseBtn.bind(this);
     this.editExpenses = this.editExpenses.bind(this);
+    this.renderAllExpenses = this.renderAllExpenses.bind(this);
   }
 
   componentDidMount() {
@@ -40,6 +41,13 @@ class Wallet extends Component {
       this.setState({ currencies: Object.keys(resp) });
     });
     this.renderAllExpenses();
+  }
+
+  componentDidUpdate(prevProps) {
+    const { userExpenses } = this.props;
+    if (prevProps.userExpenses !== userExpenses) {
+      this.renderAllExpenses();
+    }
   }
 
   onChange({ target }) {
@@ -70,7 +78,7 @@ class Wallet extends Component {
         tag: expenseType,
         exchangeRates: resp,
       });
-      this.renderAllExpenses();
+      // this.renderAllExpenses();
     });
     this.setState((prevState) => ({
       expenses: '',
@@ -97,33 +105,36 @@ class Wallet extends Component {
 
   editExpenseBtn(id) {
     const { isEditClicked } = this.state;
-    this.setState({ isEditClicked: !isEditClicked, expenseIdToBeEdited: id });
+    this.setState({ isEditClicked: !isEditClicked, id });
   }
 
   editExpenses() {
-    const { expenseIdToBeEdited, expenses, description,
+    const { id, expenses, description,
       currency, paymentMethod, expenseType } = this.state;
-    const { editExpenses } = this.props;
-    getCurrencies().then((resp) => {
-      delete resp.USDT;
+    const { editExpenses, userExpenses } = this.props;
 
-      editExpenses({
-        expenseIdToBeEdited,
-        value: expenses,
-        description,
-        currency,
-        method: paymentMethod,
-        tag: expenseType,
-        exchangeRates: resp,
-      });
-      this.renderAllExpenses();
+    const exchangeRatesArray = userExpenses
+      .filter((element) => element.id === id)
+      .map((element) => element.exchangeRates);
+
+    const exchangeRatesObject = Object.assign({}, ...exchangeRatesArray);
+    editExpenses({
+      id,
+      value: expenses,
+      description,
+      currency,
+      method: paymentMethod,
+      tag: expenseType,
+      exchangeRates: exchangeRatesObject,
     });
     this.setState({ isEditClicked: false });
+    // this.renderAllExpenses();
   }
 
   renderAllExpenses() {
     const { userExpenses } = this.props;
     let totalUserExpenses = 0;
+    console.log(userExpenses);
     userExpenses.forEach(({ currency, value }) => {
       let eachExpense = 0;
       let totalExpensesArray = [];
@@ -138,7 +149,9 @@ class Wallet extends Component {
 
       const stringToNumberExchangeCurrency = Number(expectedCurrency[0].ask);
       eachExpense = value * stringToNumberExchangeCurrency;
+      console.log(eachExpense);
       totalExpensesArray = [...totalExpensesArray, eachExpense];
+      console.log(totalExpensesArray);
 
       totalExpensesArray.forEach((element) => {
         totalUserExpenses += element;
@@ -154,15 +167,11 @@ class Wallet extends Component {
 
     return (
       <div>
-        <h1>TrybeWallet</h1>
-        <span data-testid="email-field">{email}</span>
-        <span
-          data-testid="total-field"
-          // data-testid="currency-input"
-        >
-          {totalExpenses.toFixed(2)}
-        </span>
-        <span data-testid="header-currency-field">BRL</span>
+        <Header
+          email={ email }
+          userExpenses={ userExpenses }
+          totalExpenses={ totalExpenses }
+        />
         <Form
           currencies={ currencies }
           expenses={ expenses }
