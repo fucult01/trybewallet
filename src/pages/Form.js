@@ -30,6 +30,7 @@ export default function Form({ currencies, expenses, description,
       <label htmlFor="moeda">
         Moeda:
         <select
+          data-testid="currency-input"
           id="moeda"
           name="currency"
           value={ currency }

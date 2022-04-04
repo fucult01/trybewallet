@@ -1,6 +1,6 @@
 // Coloque aqui suas actions
 import { LOGIN_MODAL_OPEN, GET_CURRENCIES,
-  SAVE_EXPENSES, DELETE_EXPENSE } from '../constants';
+  SAVE_EXPENSES, DELETE_EXPENSE, EDIT_EXPENSE } from '../constants';
 
 export function userLogin(payload) {
   return {
@@ -26,6 +26,13 @@ export function saveExpensesToStore(payload) {
 export function deleteExpense(payload) {
   return {
     type: DELETE_EXPENSE,
+    payload,
+  };
+}
+
+export function editExpensesToStore(payload) {
+  return {
+    type: EDIT_EXPENSE,
     payload,
   };
 }

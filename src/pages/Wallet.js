@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import getCurrencies from '../services/api';
-import { deleteExpense, saveCurrenciesToStore, saveExpensesToStore } from '../actions';
+import { deleteExpense, saveCurrenciesToStore,
+  saveExpensesToStore, editExpensesToStore } from '../actions';
 import Form from './Form';
 import Table from './Table';
 
@@ -12,18 +13,22 @@ class Wallet extends Component {
 
     this.state = {
       id: 0,
+      expenseIdToBeEdited: 0,
       currencies: [],
       expenses: '',
       description: '',
-      currency: 'USD',
+      currency: 'CAD',
       paymentMethod: 'Dinheiro',
       expenseType: 'Alimentação',
       totalExpenses: 0,
+      isEditClicked: false,
     };
 
     this.onChange = this.onChange.bind(this);
     this.onBtnClick = this.onBtnClick.bind(this);
     this.deleteExpenseBtn = this.deleteExpenseBtn.bind(this);
+    this.editExpenseBtn = this.editExpenseBtn.bind(this);
+    this.editExpenses = this.editExpenses.bind(this);
   }
 
   componentDidMount() {
@@ -90,6 +95,32 @@ class Wallet extends Component {
     saveNewExpensesToStore(id);
   }
 
+  editExpenseBtn(id) {
+    const { isEditClicked } = this.state;
+    this.setState({ isEditClicked: !isEditClicked, expenseIdToBeEdited: id });
+  }
+
+  editExpenses() {
+    const { expenseIdToBeEdited, expenses, description,
+      currency, paymentMethod, expenseType } = this.state;
+    const { editExpenses } = this.props;
+    getCurrencies().then((resp) => {
+      delete resp.USDT;
+
+      editExpenses({
+        expenseIdToBeEdited,
+        value: expenses,
+        description,
+        currency,
+        method: paymentMethod,
+        tag: expenseType,
+        exchangeRates: resp,
+      });
+      this.renderAllExpenses();
+    });
+    this.setState({ isEditClicked: false });
+  }
+
   renderAllExpenses() {
     const { userExpenses } = this.props;
     let totalUserExpenses = 0;
@@ -119,13 +150,18 @@ class Wallet extends Component {
   render() {
     const { email, userExpenses } = this.props;
     const { currencies, expenses, description,
-      currency, paymentMethod, expenseType, totalExpenses } = this.state;
+      currency, paymentMethod, expenseType, totalExpenses, isEditClicked } = this.state;
 
     return (
       <div>
         <h1>TrybeWallet</h1>
         <span data-testid="email-field">{email}</span>
-        <span data-testid="total-field">{totalExpenses.toFixed(2)}</span>
+        <span
+          data-testid="total-field"
+          // data-testid="currency-input"
+        >
+          {totalExpenses.toFixed(2)}
+        </span>
         <span data-testid="header-currency-field">BRL</span>
         <Form
           currencies={ currencies }
@@ -135,16 +171,29 @@ class Wallet extends Component {
           currency={ currency }
           paymentMethod={ paymentMethod }
           expenseType={ expenseType }
+          isEditClicked={ isEditClicked }
         />
-        <button
-          type="button"
-          onClick={ this.onBtnClick }
-        >
-          Adicionar despesa
-        </button>
+        {isEditClicked
+          ? (
+            <button
+              type="button"
+              onClick={ this.editExpenses }
+            >
+              Editar Despesa
+            </button>
+          )
+          : (
+            <button
+              type="button"
+              onClick={ this.onBtnClick }
+            >
+              Adicionar despesa
+            </button>
+          )}
         <Table
           expenses={ userExpenses }
           deleteExpenseBtn={ this.deleteExpenseBtn }
+          editExpenseBtn={ this.editExpenseBtn }
         />
       </div>
     );
@@ -161,6 +210,7 @@ const mapDispatchToProps = (dispatch) => ({
   sendCurrenciesToStore: (payload) => dispatch(saveCurrenciesToStore(payload)),
   sendExpensesToStore: (payload) => dispatch(saveExpensesToStore(payload)),
   saveNewExpensesToStore: (payload) => dispatch(deleteExpense(payload)),
+  editExpenses: (payload) => dispatch(editExpensesToStore(payload)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Wallet);
@@ -171,4 +221,5 @@ Wallet.propTypes = {
   sendExpensesToStore: PropTypes.func.isRequired,
   userExpenses: PropTypes.arrayOf(PropTypes.object).isRequired,
   saveNewExpensesToStore: PropTypes.func.isRequired,
+  editExpenses: PropTypes.func.isRequired,
 };

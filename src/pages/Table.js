@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { headerCell } from '../constants';
 
-export default function Table({ expenses, deleteExpenseBtn }) {
+export default function Table({ expenses, deleteExpenseBtn, editExpenseBtn }) {
   return (
     <header>
       <table>
@@ -21,11 +21,18 @@ export default function Table({ expenses, deleteExpenseBtn }) {
                 <td>{tag}</td>
                 <td>{method}</td>
                 <td>{(Number(value)).toFixed(2)}</td>
-                <td>{exchangeRates[currency].name}</td>
+                <td>{(exchangeRates[currency].name).split('/')[0]}</td>
                 <td>{Number((exchangeRates)[currency].ask).toFixed(2)}</td>
                 <td>{(((exchangeRates)[currency].ask) * value).toFixed(2)}</td>
                 <td>Real</td>
                 <td>
+                  <button
+                    type="button"
+                    data-testid="edit-btn"
+                    onClick={ () => editExpenseBtn(id) }
+                  >
+                    Editar
+                  </button>
                   <button
                     type="button"
                     data-testid="delete-btn"
@@ -45,4 +52,5 @@ export default function Table({ expenses, deleteExpenseBtn }) {
 Table.propTypes = {
   expenses: PropTypes.arrayOf(PropTypes.object).isRequired,
   deleteExpenseBtn: PropTypes.func.isRequired,
+  editExpenseBtn: PropTypes.func.isRequired,
 };
